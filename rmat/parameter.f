@@ -6,4 +6,5 @@ ccccccc
             real*8,parameter :: amu=931.49432d0      !MeV
             real*8,parameter :: e2=1.43997d0         !MeV.fm
             real*8,parameter :: PI=acos(-1.0)
+            complex*16,parameter :: ii=(0.0d0,1.0d0)
       end module

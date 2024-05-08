@@ -1,0 +1,21 @@
+#-----------input file for the coupled channel eq code-------------#
+
+&channelbeta   beta%jpi=1d0    beta%jd=1d0     beta%Sd=0d0   
+               beta%jt=0d0     beta%Ed=0d0                /
+
+
+&meshs       nr=200        rmax=20d0               /
+
+
+&basisvar    nbasis=5   alpha=1.2d0   gamma=1.2d0  m=4d0               /
+
+
+&systems    E=20d0    mass1=1.0078d0    mass2=1.0087d0     
+            z1=1d0     z2=0d0                           /
+
+
+&potentials str='g' v0=-72.15d0   r0=0d0  a=1.484d0            /
+
+
+
+
