@@ -8,7 +8,7 @@ VERREV := $(shell git log -1 --pretty=format:"%h")
 COMPDATE := $(shell date '+%Y-%m-%d %H:%M:%S' | tr -d '\n')
 
 # 定义编译选项，确保变量值被正确地引用
-FFLAGS = -O3 -Wall -Wextra -ffixed-line-length-0 -cpp\
+FFLAGS = -O3 -Wall -Wextra -ffixed-line-length-0 -cpp -g \
 -DBASE='"$(BASE)"' -DVERDATE='"$(VERDATE)"' -DVERREV='"$(VERREV)"' -DCOMPDATE='"$(COMPDATE)"'
 
 LDFLAGS = -llapack 

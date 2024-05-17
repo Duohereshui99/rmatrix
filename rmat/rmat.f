@@ -5,10 +5,11 @@ ccccccc
 ccccccc
             integer::i,j,k
             complex(16),allocatable::Vc(:,:,:)
+            complex(16)::sum
 ccccccc
             namelist /channelbeta/ beta
-            namelist /meshs/ nr,rmax
-            namelist /basisvar/ nbasis,alpha,gamma,m
+            namelist /meshs/ nr,ndiff,rmax
+            namelist /basisvar/ nbasis,b,gamma,m
             namelist /systems/  E,mass1,mass2,z1,z2
             namelist /potentials/ str,v0,r0,a
 ccccccc
@@ -23,35 +24,50 @@ ccccccc
             write(*,*) 'testmessages'
 ccccccc
             z12=z1*z2
-            mu=mass1*mass2/(mass1+mass2)
+            mu=amu*(mass1*mass2/(mass1+mass2))
+            alpha=1d0/2d0/b**2
 ccccccc
         call rmat_int(nr,nbasis,rmax,alpha,gamma,m,E,mu,z1,z2)
 ccccccc
         if(allocated(Vc)) deallocate(Vc)
         allocate(Vc(1:nr,1:beta%nchmax,1:beta%nchmax))    
 ccccccc
-        select case('str')
+        select case(str)
 ccccccc
             case('g')
                     do i=1,beta%nchmax
                             do j=1,beta%nchmax
                                     do k=1,nr
-                                            Vc(i,j,k)=gausspot(r(k),v0,r0,a)
+                                            Vc(k,i,j)=gausspot(r(k),v0,r0,a)*cmplx(1d0,0d0)
                                     end do 
                             end do
                     end do
         end select
-
-
-
-
 ccccccc
         call rmatrix(rmax,Vc,E,mu,z1,z2)
 ccccccc
                 do i=1,beta%nchmax
                         write(27,*) Smat(i,:)
                 end do
-        
+ccccccc
+                do k=1,nr
+                        write(29,*) r(k),real((d2phi(k,1,1)))
+                        write(30,*) r(k),r(k)*real(THOFUNC(0,0,alpha,gamma,m,r(k)*cmplx(1d0,0d0)))
+                end do
+ccccccc
+                sum=0
+                do k=1,nr
+                        sum=sum+rw(k)*conjg(phi(k,1,1))*phi(k,2,1)
+                end do
+                write(*,*) sum
+ccccccc
+
+                do k=1,nr
+                        write(31,*)  r(k),-hbarc**2/2/mu*real(conjg(phi(k,1,1))*(d2phi(k,1,1)))
+                end do
+
+
+
                 deallocate(Vc)
 ccccccc
 !!
@@ -75,7 +91,8 @@ ccccccc
 ccccccc
         real(8),intent(in)::rmax
         complex(16),intent(in)::Vc(1:nr,1:beta%nchmax,1:beta%nchmax)
-        real(8),intent(in)::E
+        complex(16)::CC(nbasis*beta%nchmax,nbasis*beta%nchmax),CI(nbasis*beta%nchmax,nbasis*beta%nchmax)
+        real(8),intent(in)::E   
         real(8),intent(in)::mu
         real(8),intent(in)::z1,z2
 ccccccc
@@ -90,7 +107,7 @@ ccccccc Ei-E matrix elements
                         do i=1,beta%nchmax
                                 Ech(mm,nn,i)=0d0
                                 do j=1,nr
-                                        Ech(mm,nn,i)=Ech(mm,nn,i)+conjg(phi(j,mm,i))*(Ec(i)-E)*phi(j,nn,i)*r(j)**2*rw(j)                             
+                                        Ech(mm,nn,i)=Ech(mm,nn,i)+(Ec(i)-E)*conjg(phi(j,mm,i))*phi(j,nn,i)*rw(j)                             
                                 end do
                         end do
                 end do
@@ -102,7 +119,7 @@ ccccccc coupled potential matrix elements Vcouple_{im,jn}
                                 do j=1,beta%nchmax
                                         Vcouple(mm,nn,i,j)=0d0
                                         do k=1,nr
-                                             Vcouple(mm,nn,i,j)=Vcouple(mm,nn,i,j)+conjg(phi(k,mm,i))*Vc(k,i,j)*phi(k,nn,j)*r(k)**2*rw(k)   
+                                             Vcouple(mm,nn,i,j)=Vcouple(mm,nn,i,j)+conjg(phi(k,mm,i))*Vc(k,i,j)*phi(k,nn,j)*rw(k)   
                                         end do
                                 end do
                         end do
@@ -116,11 +133,16 @@ ccccccc
                         do i=1,beta%nchmax
                                 T(mm,nn,i)=0d0
                                 do k=1,nr
-        T(mm,nn,i)=T(mm,nn,i)+r(k)**2*rw(k)*conjg(phi(k,mm,i))*(-hbarc**2/2/mu*d2phi(k,nn,i)+lc(i)*(lc(i)+1)/r(k)**2*phi(k,nn,i))
-     &   +hbarc**2/2/mu*(conjg(phia(mm,i))*phipa(nn,i)-conjg(phia(mm,i))*B_i(i)/rmax*phia(nn,i))
+                T(mm,nn,i)=T(mm,nn,i)+rw(k)*conjg(phi(k,mm,i))*(-hbarc**2/2/mu*d2phi(k,nn,i)+lc(i)*(lc(i)+1)/r(k)**2*phi(k,nn,i))
                                 end do
+                T(mm,nn,i)=T(mm,nn,i)+hbarc**2/2/mu*(conjg(phia(mm,i))*phipa(nn,i)-conjg(phia(mm,i))*B_i(i)/rmax*phia(nn,i))
                         end do
                 end do
+        end do
+ccccccc
+100      format(5F18.6)
+        do i=1,nbasis
+                write(789,100) real(T(i,:,1))
         end do
 ccccccc
 !then we add the several matrix elements together to get Cmatrix before the reconstruction
@@ -145,10 +167,22 @@ ccccccc
                         end do
                 end do
         end do
+        CC=C
+
+        do i=1,nbasis*beta%nchmax
+                write(666,*) (CC(i,:))
+        end do
 ccccccc
 !get the inversion of Cmatrix, and the inversion is stored just in C.
         call mat_inv(C,nbasis*beta%nchmax,nbasis*beta%nchmax)
 ccccccc
+        CI=matmul(C,CC)      
+        do i=1,nbasis*beta%nchmax
+                write(667,*) (C(i,:))
+        end do
+        do i=1,nbasis*beta%nchmax
+               write(777,*) CI(i,:)
+        end do
 !Rmatrix , R_{ij}=hbar^2/(2mu a)*\sum_{mn}φ_n(a)(C^{-1})_{in,jm}φ_m(a)
         do i=1,beta%nchmax
                 do j=1,beta%nchmax

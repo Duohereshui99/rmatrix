@@ -3,13 +3,17 @@
             use parameter
             implicit none
             integer::nbasis
-            real(8)::alpha,gamma,m
+            real(8)::alpha,gamma,m,b
 !phi: basis, (1:Nr,1:Nbasis,1:Nch), each channel (L) in line with Nbasis basis functions
 !d2phi: 2nd derivative of basis functions, size the same as that of phi
+!phi1: the value of basis at uniformed mesh, size (1:ndiff)
+!d2phi1:: the 2nd derivative of basis at uniformed mesh,size (1:ndiff)
 !phia: the value of basis at the boundary r=a, phi(a), size: (1:Nbasis,1:Nch)
 !phipa: the derivative of basis at the boundary r=a, phi'(a), size: (1:Nbasis,1:Nch)
             complex(16),allocatable::phi(:,:,:)
             complex(16),allocatable::d2phi(:,:,:)
+            complex(16),allocatable::phi1(:)
+            complex(16),allocatable::d2phi1(:)
             complex(16),allocatable::phia(:,:)
             complex(16),allocatable::phipa(:,:)
             contains

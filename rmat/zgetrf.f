@@ -8,8 +8,8 @@ ccccccc
 
         contains
 ccccccc
-            subroutine mat_inv(a,n,lda)
-            integer::n,lda,info,lwork,i
+            subroutine mat_inv(a,lda,n)
+            integer::n,lda,info,lwork
             complex*32::a(n,n)
             complex*16,allocatable::work(:)  
             integer,allocatable::ipiv(:)

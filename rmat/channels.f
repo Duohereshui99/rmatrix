@@ -4,7 +4,7 @@ ccccccc
 !channel index for decay type(alpha), including        
 !daughter nucleus spin sd, daughter nucleus excitation Ed,
 !orbit angular momenta L, total(d+alpha) parity jpi
-!total j(parent nucleus j)
+!total j(parent nucleus jt)
 !minimum and maximum orbit angular momenta lmin,lmax
 !jd is the parity of the daughter nucleus 
 !where lmin=|j-s|,lmax=j+s

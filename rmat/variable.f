@@ -27,13 +27,19 @@ ccccccc
 ccccccc
 !rmax:cut-off radius rmax=a
 !nr: number of integral mesh points
+!ndiff: number of mesh points for uniformed mesh
+!hcm: uniformed mesh step,real type
+!hcm1: uniformed mesh step,complex type
 !r,rw: integral radius vector, integral weight, which should be (1:Nr)
+!rr: uniformed mesh points, which should be (1:Ndiff)
 !rc: complex type r
         module mesh 
             implicit none
             real(8)::rmax
-            integer::nr
-            real(8),allocatable::r(:),rw(:)
+            integer::nr,ndiff
+            real(8)::hcm
+            complex(16)::hcm1
+            real(8),allocatable::r(:),rr(:),rw(:)
             complex(16),allocatable::rc(:)
         end module
 ccccccc
